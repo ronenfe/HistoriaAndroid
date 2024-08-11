@@ -11,7 +11,7 @@ public class HistoriaService extends Service {
 
 	public static boolean isServiceStarted = false;
 	private static boolean isContentObserverRegistered = false;
-	
+
 	 @Override
 	    public IBinder onBind(Intent intent) {
 	        return null;
@@ -28,13 +28,13 @@ public class HistoriaService extends Service {
 	        Main.getSettings(getApplicationContext());
 //	        Log.d("HistoriaonCreate", "onCreate");
 	        isServiceStarted = true;
-	        if (isContentObserverRegistered == false)
+	        if (!isContentObserverRegistered)
 	 	   	{
 	 	    CallLogContentObserver callLogContentObserver = new CallLogContentObserver(new Handler(), getApplicationContext());
 	        this.getApplicationContext()
 	 	    .getContentResolver()
 	 	    .registerContentObserver(
-	 	            android.provider.CallLog.Calls.CONTENT_URI, true,callLogContentObserver); 
+	 	            android.provider.CallLog.Calls.CONTENT_URI, true,callLogContentObserver);
 	        isContentObserverRegistered = true;
 	 	   	}
 //	        Log.d("onCreate","onCreate");
@@ -45,4 +45,5 @@ public class HistoriaService extends Service {
 	        super.onStartCommand(intent, flags, startId); // If this is not written then onHandleIntent is not called.
 	        return START_STICKY;
 	    }
+
 	}

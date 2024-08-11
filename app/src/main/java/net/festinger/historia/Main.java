@@ -13,6 +13,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
@@ -23,8 +24,12 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 public class Main extends Activity// main screen of historia
 {
+	private static final int REQUEST_CODE_READ_CALL_LOG = 1234;
 	public ListView listView = null;
 	public static final String PREFS_NAME = "PrefsFile";
 	public static SharedPreferences keys; // saved settings keys
@@ -85,6 +90,16 @@ public class Main extends Activity// main screen of historia
 
 			if (HistoriaService.isServiceStarted == false) {
 				Intent intent = new Intent(this, HistoriaService.class);
+				if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_CALL_LOG)
+						!= PackageManager.PERMISSION_GRANTED) {
+					ActivityCompat.requestPermissions(
+							this,
+							new String[]{android.Manifest.permission.READ_CALL_LOG},REQUEST_CODE_READ_CALL_LOG);
+				} else {
+					// Permission already granted, start the service
+					Intent serviceIntent = new Intent(this, HistoriaService.class);
+					startService(serviceIntent);
+				}
 				startService(intent);
 			}
 			isFirstTime = false;
@@ -101,7 +116,19 @@ public class Main extends Activity// main screen of historia
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
 	}
-
+	@Override
+	public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+		super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+		if (requestCode == REQUEST_CODE_READ_CALL_LOG) {
+			if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+				// Permission granted, start the service
+				Intent serviceIntent = new Intent(this, HistoriaService.class);
+				startService(serviceIntent);
+			} else {
+				// Permission denied, handle accordingly
+			}
+		}
+	}
 	@Override
 	public void onBackPressed() {
 		isListDirty = true;
