@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Historia</string>
+    <string name="type">Type</string>
+    <string name="noData">No Calls</string>
+</resources>
