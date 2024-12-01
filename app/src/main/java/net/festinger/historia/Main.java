@@ -3,7 +3,7 @@ package net.festinger.historia;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Calendar;
-
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ListActivity;
@@ -80,27 +80,25 @@ public class Main extends Activity// main screen of historia
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		if (isFirstTime == true) {
+		if (isFirstTime) {
 			getSettings(getApplicationContext());
 			setContentView(R.layout.listview);
 			listView = (ListView) findViewById(R.id.list);
 			listView.setVisibility(View.GONE);
-		    findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
+			findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
 			listView.setEmptyView(findViewById(R.id.emptyView));
 
-			if (HistoriaService.isServiceStarted == false) {
-				Intent intent = new Intent(this, HistoriaService.class);
-				if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_CALL_LOG)
+			if (!HistoriaService.isServiceStarted) {
+				if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALL_LOG)
 						!= PackageManager.PERMISSION_GRANTED) {
 					ActivityCompat.requestPermissions(
 							this,
-							new String[]{android.Manifest.permission.READ_CALL_LOG},REQUEST_CODE_READ_CALL_LOG);
+							new String[]{Manifest.permission.READ_CALL_LOG},
+							REQUEST_CODE_READ_CALL_LOG);
 				} else {
 					// Permission already granted, start the service
-					Intent serviceIntent = new Intent(this, HistoriaService.class);
-					startService(serviceIntent);
+					startHistoriaService();
 				}
-				startService(intent);
 			}
 			isFirstTime = false;
 		}
@@ -111,7 +109,11 @@ public class Main extends Activity// main screen of historia
 		// saveCSV(); // store new calls in csv file
 		// showCallList(); //display list on screen
 	}
-
+	private void startHistoriaService() {
+		Intent serviceIntent = new Intent(this, HistoriaService.class);
+		startService(serviceIntent);
+		HistoriaService.isServiceStarted = true; // Update the flag
+	}
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
